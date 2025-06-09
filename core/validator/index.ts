@@ -1,7 +1,7 @@
 // fusion-engine/core/validator/index.ts
 import chalk from 'chalk';
 import path from 'path'; // ✅ اضافه شد: برای استفاده از path.resolve
-
+export * from './interfaces';
 // Import all validator functions
 import { runSelfTest } from './selfTest';
 import { scanProjectFilesForValidation } from './projectScanner';

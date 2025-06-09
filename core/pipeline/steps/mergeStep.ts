@@ -2,7 +2,8 @@
 import chalk from 'chalk';
 import generate from '@babel/generator'; // For generating final code from merged AST
 import * as t from '@babel/types'; // For AST types if needed for final checks
-
+// این تایپ رو از منبع اصلیش، دوباره صادر کن
+export type { DeepMergeSummary } from '../../../logic/merger/interfaces';
 // Import types from previous pipeline steps
 import { NormalizationInput, NormalizationOutput, NormalizedComponent, NormalizedHook, NormalizedUtility, NormalizedContext } from './normalizeStep';
 import { ResolveAndMergeStepOutput } from './resolveAndMergeStep'; // For access to conflicts

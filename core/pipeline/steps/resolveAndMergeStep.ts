@@ -5,7 +5,8 @@ import path from 'path';
 // Import necessary types from modules/analyzer
 import { AnalyzedProject, ASTDependency } from '../../../modules/analyzer/workspaceAnalyzer';
 import { MergeConflict, MergeConflictReport } from './resolveStep'; // Re-use conflict types from resolveStep
-
+// این تایپ رو از منبع اصلیش، دوباره صادر کن
+export type { MergeConflictReport } from './resolveStep';
 // --- New Interfaces for Merged Entities ---
 
 /** Base interface for any merged entity. */
@@ -51,14 +52,16 @@ export type ResolveAndMergeStepInput = {
   analyzedWorkspaces: AnalyzedProject[]; // Output from ScanStep
 };
 
+
 export type ResolveAndMergeStepOutput = {
   mergedEntities: {
     components: MergedComponent[];
     hooks: MergedHook[];
     utilities: MergedUtility[];
-    contexts: MergedContext[]; // Added contexts
+    contexts: MergedContext[];
   };
-  mergeConflicts: MergeConflictReport; // Re-use conflict report interface
+  mergeConflicts: MergeConflictReport;
+  internalMap: InternalDependencyMap; // << این خط اضافه شد
   summary: {
     totalInputEntities: number;
     totalMergedEntities: number;
@@ -431,6 +434,7 @@ export async function runResolveAndMergeStep(input: ResolveAndMergeStepInput): P
       contexts: mergedContexts,
     },
     mergeConflicts: conflictReport,
+    internalMap: originalPathToUnifiedId,
     summary: outputSummary,
   };
 }
