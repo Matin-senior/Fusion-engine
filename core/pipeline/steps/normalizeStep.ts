@@ -23,26 +23,30 @@ export type NormalizationInput = {
 };
 
 /** Base interface for any normalized entity. */
+
 export interface NormalizedEntityBase {
   id: string; // Unique ID (same as merged ID)
   name: string;
   unifiedPath: string; // The proposed new relative path
   normalizedCode: string; // The standardized code content
+  originalPaths: string[];
+  loc: number;
+  isShared: boolean; // ✅ این خط را اضافه کن
 }
 
 /** Defines a normalized component. */
-export interface NormalizedComponent extends NormalizedEntityBase {
+export interface NormalizedComponent extends NormalizedEntityBase { // ✅ Fixed: Extend NormalizedEntityBase
   type: 'functional' | 'class';
 }
 
 /** Defines a normalized hook. */
-export interface NormalizedHook extends NormalizedEntityBase {}
+export interface NormalizedHook extends NormalizedEntityBase {} // ✅ Fixed: Extend NormalizedEntityBase
 
 /** Defines a normalized utility. */
-export interface NormalizedUtility extends NormalizedEntityBase {}
+export interface NormalizedUtility extends NormalizedEntityBase {} // ✅ Fixed: Extend NormalizedEntityBase
 
 /** Defines a normalized context. */
-export interface NormalizedContext extends NormalizedEntityBase {
+export interface NormalizedContext extends NormalizedEntityBase { // ✅ Fixed: Extend NormalizedEntityBase
   contextType: 'Provider' | 'Consumer' | 'Context';
 }
 
@@ -71,13 +75,29 @@ function logBoxedMessage(message: string, color: typeof chalk): void {
 }
 
 /** Dynamically determines Babel parser plugins based on file extension (re-used from astAnalyzer). */
+// function getBabelPlugins(extension: string): parser.ParserPlugin[] {
+
+//     const plugins: parser.ParserPlugin[] = [
+//       'jsx', 'classProperties', 'objectRestSpread', 'exportDefaultFrom',
+//       'exportNamespaceFrom', 'dynamicImport', 'optionalChaining',
+//       'nullishCoalescingOperator', 'decorators-legacy', 'estree', 'importAssertions',
+//       // ✅ حذف شد: این پلاگین‌ها باعث خطا می‌شوند و معمولاً توسط 'classProperties' o'typescript' پوشش داده می‌شوند.
+//     ];
+//     if (extension === '.ts' || extension === '.tsx') {
+//       plugins.push('typescript');
+//     } else if (extension === '.flow' || extension === '.flow.js') {
+//       plugins.push('flow');
+//     }
+//     return plugins;
+// }
 function getBabelPlugins(extension: string): parser.ParserPlugin[] {
     const plugins: parser.ParserPlugin[] = [
-      'jsx', 'classProperties', 'objectRestSpread', 'exportDefaultFrom',
+      'jsx', 'objectRestSpread', 'exportDefaultFrom',
       'exportNamespaceFrom', 'dynamicImport', 'optionalChaining',
       'nullishCoalescingOperator', 'decorators-legacy', 'estree', 'importAssertions',
-      // ✅ حذف شد: این پلاگین‌ها باعث خطا می‌شوند و معمولاً توسط 'classProperties' یا 'typescript' پوشش داده می‌شوند.
-      // 'privateMethods', 'classPrivateProperties', 'classStaticBlock', 
+      'classProperties', // این ممکنه لازم باشه اگر کلاس‌های قدیمی رو استفاده می‌کنی
+      // 'asyncGenerators', // حذف شد اگر مشکل‌ساز بود
+      // 'optionalCatchBinding', // حذف شد اگر مشکل‌ساز بود
     ];
     if (extension === '.ts' || extension === '.tsx') {
       plugins.push('typescript');
@@ -86,7 +106,6 @@ function getBabelPlugins(extension: string): parser.ParserPlugin[] {
     }
     return plugins;
 }
-
 
 // --- AST Normalization Helpers with Change Tracking ---
 
@@ -349,12 +368,15 @@ export async function runNormalizeStep(input: NormalizationInput): Promise<Norma
         // Pass originalFileAnalysis.file to normalizeCode for detailed context
         const { normalizedCode, report: fileNormReport } = normalizeCode(originalCode, originalFileAnalysis.file);
 
-        const baseNormalizedProps = {
-          id: entity.id,
-          name: entity.name,
-          unifiedPath: entity.unifiedPath,
-          normalizedCode: normalizedCode,
-        };
+const baseNormalizedProps = {
+  id: entity.id,
+  name: entity.name,
+  unifiedPath: entity.unifiedPath,
+  normalizedCode: normalizedCode,
+  originalPaths: entity.originalPaths, // ✅ این خط را اضافه کن
+  loc: entity.loc, // ✅ این خط را اضافه کن
+  isShared: entity.isShared, // ✅ این خط را اضافه کن
+};
 
         if (entity.hasOwnProperty('type') && (entity as MergedComponent).type) { // It's a MergedComponent
           normalizedList.push({ ...baseNormalizedProps, type: (entity as MergedComponent).type } as NormalizedComponent);
